@@ -6,36 +6,18 @@ const sharp = require('sharp');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const path = require('path');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 
 const app = express();
 
 // ======================
-// 1. GEMINI AI INIT (CORRECT CONFIG)
+// 1. GEMINI AI INIT
 // ======================
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Get the correct model name dynamically
-async function getModel() {
-  try {
-    const models = await genAI.listModels();
-    const availableModels = models.models.map(m => m.name);
-    
-    // Prefer newer models first
-    if (availableModels.includes('models/gemini-1.5-pro-latest')) {
-      return genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
-    }
-    if (availableModels.includes('models/gemini-pro')) {
-      return genAI.getGenerativeModel({ model: "gemini-pro" });
-    }
-    throw new Error('No supported Gemini models available');
-  } catch (err) {
-    console.error('Model listing failed, using fallback');
-    return genAI.getGenerativeModel({ model: "gemini-pro" });
-  }
-}
-
-// Initialize model
-const modelPromise = getModel();
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-1.5-flash",
+  apiVersion: "v1"
+});
 
 // ======================
 // 2. APP CONFIGURATION
@@ -43,27 +25,31 @@ const modelPromise = getModel();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 
 const uploadDir = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 // ======================
-// 3. FILE UPLOAD SETUP
+// 3. FILE UPLOAD SETUP (FOR BOTH REGULAR UPLOADS AND CAMERA CAPTURES)
 // ======================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadDir),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
-  }),
+  storage: storage,
   fileFilter: (req, file, cb) => {
-    const validTypes = ['image/jpeg', 'image/png'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     cb(null, validTypes.includes(file.mimetype));
   },
   limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 // ======================
-// 4. IMAGE PROCESSING
+// 4. IMAGE PROCESSING FUNCTIONS
 // ======================
 async function preprocessImage(imagePath) {
   const processedPath = path.join(uploadDir, 'processed_' + path.basename(imagePath));
@@ -76,45 +62,76 @@ async function preprocessImage(imagePath) {
   return processedPath;
 }
 
-// ======================
-// 5. TEXT EXTRACTION
-// ======================
 async function extractText(imagePath) {
   const { data: { text } } = await Tesseract.recognize(
     imagePath,
     'eng',
-    // { logger: m => console.log(m.status) }
+    { logger: m => console.log(m.status) }
   );
   return text;
 }
 
 // ======================
-// 6. GEMINI ANALYSIS (FIXED API CALL)
+// 5. GEMINI ANALYSIS
 // ======================
 async function analyzeIngredients(ingredients) {
   try {
-    const model = await modelPromise;
-    const prompt = `Analyze these food ingredients and provide JSON output with:
+    const prompt = `Analyze these food ingredients and provide:
     - Product name
-    - Health risks
+    - Health risks (⚠️ warnings)
     - Recommended consumption
-    - Risk rating
-    - Alternatives
+    - Risk rating (Low/Moderate/High)
+    - Healthier alternatives
     
-    Ingredients: ${ingredients.substring(0, 5000)}`;
+    Ingredients: ${ingredients.substring(0, 5000)}
+    
+    Respond in JSON format exactly like this example:
+    {
+      "productName": "Detected Product Name",
+      "ingredients": ["list", "of", "ingredients"],
+      "healthWarnings": [
+        {"ingredient": "Sugar", "risk": "High sugar content", "level": "High"}
+      ],
+      "recommendations": {
+        "safeConsumption": "Limit to 1 serving per day",
+        "riskRating": "Moderate",
+        "alternatives": ["Healthier option 1", "Option 2"]
+      }
+    }`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
     
-    // Clean response and parse JSON
     const cleanText = text.replace(/```json|```/g, '');
     return JSON.parse(cleanText);
     
   } catch (err) {
-    // console.error('Gemini Error:', err);
-    throw new Error('AI analysis failed. Please try again later.');
+    console.error('Gemini Error:', err);
+    throw new Error('AI analysis failed. Please try again with clearer text.');
   }
+}
+
+// ======================
+// 6. HELPER FUNCTION TO SAVE BASE64 IMAGES
+// ======================
+function saveBase64Image(base64Data) {
+  const matches = base64Data.match(/^data:image\/([A-Za-z-+\/]+);base64,(.+)$/);
+  if (!matches || matches.length !== 3) {
+    throw new Error('Invalid base64 image data');
+  }
+
+  const extension = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+  const filename = `camera_${Date.now()}.${extension}`;
+  const filePath = path.join(uploadDir, filename);
+
+  const buffer = Buffer.from(matches[2], 'base64');
+  fs.writeFileSync(filePath, buffer);
+
+  return {
+    path: filePath,
+    filename: filename
+  };
 }
 
 // ======================
@@ -124,30 +141,42 @@ app.get('/', (req, res) => res.render('index'));
 
 app.post('/upload', upload.single('image'), async (req, res) => {
   try {
-    if (!req.file) throw new Error('Please upload an image');
-    
-    // Process image
-    const processedPath = await preprocessImage(req.file.path);
+    let imagePath;
+    let filename;
+
+    // Handle camera image upload (base64)
+    if (req.body.cameraImage) {
+      const savedImage = saveBase64Image(req.body.cameraImage);
+      imagePath = savedImage.path;
+      filename = savedImage.filename;
+    } 
+    // Handle regular file upload
+    else if (req.file) {
+      imagePath = req.file.path;
+      filename = req.file.filename;
+    } 
+    else {
+      throw new Error('No image provided');
+    }
+
+    // Process and analyze the image
+    const processedPath = await preprocessImage(imagePath);
     const text = await extractText(processedPath);
-    
-    // Analyze with Gemini
     const analysis = await analyzeIngredients(text);
-    
-    // Cleanup
+
+    // Cleanup processed image (keep original)
     fs.unlinkSync(processedPath);
-    
+
     // Render results
     res.render('result', {
-      imagePath: `/uploads/${path.basename(req.file.filename)}`,
+      imagePath: `/uploads/${filename}`,
       analysis: analysis
     });
-    
+
   } catch (err) {
     console.error(err);
     res.status(500).render('error', { 
-      message: err.message.includes('AI analysis') 
-        ? err.message 
-        : 'Processing failed. Please try a clearer image.'
+      message: err.message 
     });
   }
 });
