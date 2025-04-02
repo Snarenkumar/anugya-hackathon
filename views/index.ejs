@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>OCR Tool</title>
+  <title>Food Scanner</title>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <h1>Upload Image for OCR</h1>
-  <form action="/upload" method="POST" enctype="multipart/form-data">
-    <input type="file" name="image" accept="image/*" required>
-    <button type="submit">Extract Text</button>
-  </form>
+  <h1>Food Ingredient Scanner</h1>
+  <div class="scanner-box">
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+      <div class="scanner">
+        <div class="input1">
+          <input type="file" name="image" accept="image/*" required>
+        </div>
+        <div class="button1">
+          <button type="submit" id="button2">Scan Ingredients</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <p>Take a photo of food packaging to analyze ingredients</p>
 </body>
 </html>

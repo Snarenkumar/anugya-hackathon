@@ -1,12 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Results</title>
+  <title>Scan Results</title>
+  <style>
+    .ingredient-list { margin: 20px 0; }
+    .warning { background: #fff8e1; padding: 10px; border-left: 4px solid #ffc107; margin: 10px 0; }
+    .recommendation { background: #e8f5e9; padding: 10px; border-left: 4px solid #4caf50; margin: 10px 0; }
+    .risk-rating { font-weight: bold; }
+  </style>
 </head>
 <body>
-  <h1>Extracted Text</h1>
-  <img src="<%= imagePath %>" style="max-width: 500px;">
-  <pre><%= extractedText %></pre>
-  <a href="/">Try Another</a>
+  <h1>Scan Results: <%= analysis.productName %></h1>
+  
+  <div class="ingredient-list">
+    <h3>Detected Ingredients:</h3>
+    <ul>
+      <% analysis.ingredients.forEach(ingredient => { %>
+        <li><%= ingredient %></li>
+      <% }); %>
+    </ul>
+  </div>
+
+  <div class="health-warnings">
+    <h3>⚠️ Health Warnings:</h3>
+    <% analysis.healthWarnings.forEach(warning => { %>
+      <div class="warning">
+        <strong><%= warning.ingredient %></strong>:
+        <%= warning.risk %>
+        <span class="risk-rating risk-<%= warning.level.toLowerCase() %>">
+          (<%= warning.level %> Risk)
+        </span>
+      </div>
+    <% }); %>
+  </div>
+
+  <div class="recommendations">
+    <h3>✅ Recommendations:</h3>
+    <div class="recommendation">
+      <p><strong>Safe Consumption:</strong> <%= analysis.recommendations.safeConsumption %></p>
+      <p><strong>Risk Rating:</strong> 
+        <span class="risk-rating risk-<%= analysis.recommendations.riskRating.toLowerCase() %>">
+          <%= analysis.recommendations.riskRating %>
+        </span>
+      </p>
+      <% if (analysis.recommendations.alternatives.length > 0) { %>
+        <p><strong>Healthier Alternatives:</strong> 
+          <%= analysis.recommendations.alternatives.join(', ') %>
+        </p>
+      <% } %>
+    </div>
+  </div>
+
+  <a href="/">Scan Another Product</a>
 </body>
 </html>
