@@ -14,11 +14,28 @@ const app = express();
 // ======================
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// Use the correct model name for current API version
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash", // Updated model name
-  apiVersion: "v1" // Specify API version
-});
+// Get the correct model name dynamically
+async function getModel() {
+  try {
+    const models = await genAI.listModels();
+    const availableModels = models.models.map(m => m.name);
+    
+    // Prefer newer models first
+    if (availableModels.includes('models/gemini-1.5-pro-latest')) {
+      return genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    }
+    if (availableModels.includes('models/gemini-pro')) {
+      return genAI.getGenerativeModel({ model: "gemini-pro" });
+    }
+    throw new Error('No supported Gemini models available');
+  } catch (err) {
+    console.error('Model listing failed, using fallback');
+    return genAI.getGenerativeModel({ model: "gemini-pro" });
+  }
+}
+
+// Initialize model
+const modelPromise = getModel();
 
 // ======================
 // 2. APP CONFIGURATION
@@ -66,7 +83,7 @@ async function extractText(imagePath) {
   const { data: { text } } = await Tesseract.recognize(
     imagePath,
     'eng',
-    { logger: m => console.log(m.status) }
+    // { logger: m => console.log(m.status) }
   );
   return text;
 }
@@ -76,40 +93,27 @@ async function extractText(imagePath) {
 // ======================
 async function analyzeIngredients(ingredients) {
   try {
-    const prompt = `Analyze these food ingredients and provide:
+    const model = await modelPromise;
+    const prompt = `Analyze these food ingredients and provide JSON output with:
     - Product name
-    - Health risks (⚠️ warnings)
+    - Health risks
     - Recommended consumption
-    - Risk rating (Low/Moderate/High)
-    - Healthier alternatives
+    - Risk rating
+    - Alternatives
     
-    Ingredients: ${ingredients.substring(0, 5000)}
-    
-    Respond in JSON format exactly like this example:
-    {
-      "productName": "Detected Product Name",
-      "ingredients": ["list", "of", "ingredients"],
-      "healthWarnings": [
-        {"ingredient": "Sugar", "risk": "High sugar content", "level": "High"}
-      ],
-      "recommendations": {
-        "safeConsumption": "Limit to 1 serving per day",
-        "riskRating": "Moderate",
-        "alternatives": ["Healthier option 1", "Option 2"]
-      }
-    }`;
+    Ingredients: ${ingredients.substring(0, 5000)}`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
     
-    // Clean and parse response
+    // Clean response and parse JSON
     const cleanText = text.replace(/```json|```/g, '');
     return JSON.parse(cleanText);
     
   } catch (err) {
-    console.error('Gemini Error:', err);
-    throw new Error('AI analysis failed. Please try again with clearer text.');
+    // console.error('Gemini Error:', err);
+    throw new Error('AI analysis failed. Please try again later.');
   }
 }
 
@@ -141,7 +145,9 @@ app.post('/upload', upload.single('image'), async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).render('error', { 
-      message: err.message 
+      message: err.message.includes('AI analysis') 
+        ? err.message 
+        : 'Processing failed. Please try a clearer image.'
     });
   }
 });
