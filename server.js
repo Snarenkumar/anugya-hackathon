@@ -15,7 +15,7 @@ const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
   apiVersion: "v1"
 });
-
+//new
 // 2. APP CONFIGURATION
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
