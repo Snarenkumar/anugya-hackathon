@@ -95,6 +95,106 @@ async function analyzeIngredients(ingredients) {
   }
 }
 
+// Add this new function in your server.js (around line 70)
+async function detailedAnalysis(ingredients, productName) {
+  try {
+    const prompt = `Analyze the food product "${productName}" for a comprehensive health assessment. Provide:
+    
+    1. Ingredient Breakdown (as JSON arrays):
+       - positiveIngredients: [{name: string, benefit: string}], so it must include min 5 points, its ok even if no ingridients are there, just include its general information
+       - negativeIngredients: [{name: string, concern: string}], so it must include min 5 points,its ok even if no ingridients are there, just include its general information
+    
+    2. Safety Evaluation:
+       - safetyRating: number (1-10)
+       - safetyExplanation: string
+    
+    3. Harmful Chemicals:
+       - harmfulChemicals: [{name: string, commonUses: string, healthImpact: string}]
+    
+    4. Consumption Recommendation:
+       - recommendation: string
+       - recommendationReason: string
+    
+    Ingredients: ${ingredients.substring(0, 5000)}
+    
+    Format response as JSON. Use simple language.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    return JSON.parse(text.replace(/```json|```/g, ''));
+  } catch (err) {
+    console.error('Detailed Analysis Error:', err);
+    throw new Error('Detailed analysis failed');
+  }
+}
+
+// Update your /final route (around line 140)
+// In your server.js file, update the /final route:
+app.get('/final', async (req, res) => {
+  try {
+    const analysis = JSON.parse(decodeURIComponent(req.query.analysis));
+    const imagePath = req.query.imagePath;
+    
+    // Ensure we have all required data
+    if (!analysis.safetyRating || typeof analysis.safetyRating.score === 'undefined') {
+      throw new Error('Invalid analysis data');
+    }
+
+    // Transform the data structure if needed
+    const detailedAnalysis = {
+      safetyRating: analysis.safetyRating.score,
+      safetyExplanation: analysis.safetyRating.explanation,
+      positiveIngredients: analysis.keyIngredients.map(ing => ({
+        name: ing,
+        benefit: `Natural ingredient found in ${ing.toLowerCase().includes('oil') ? 'healthy foods' : 'many foods'}`
+      })),
+      negativeIngredients: analysis.harmfulChemicals.map(chem => ({
+        name: chem,
+        concern: 'Potential health risks with regular consumption'
+      })),
+      harmfulChemicals: analysis.harmfulChemicals.map(chem => ({
+        name: chem,
+        commonUses: getCommonUses(chem),
+        healthImpact: getHealthImpact(chem)
+      })),
+      recommendationReason: analysis.safetyAssessment || 'Based on ingredient analysis'
+    };
+
+    res.render('final', {
+      imagePath: imagePath,
+      basicAnalysis: {
+        productName: analysis.productName || 'Scanned Product'
+      },
+      detailedAnalysis: detailedAnalysis
+    });
+  } catch (err) {
+    console.error('Error in final route:', err);
+    res.status(500).render('error', { message: 'Error displaying detailed results' });
+  }
+});
+
+// Helper functions
+function getCommonUses(chemical) {
+  const uses = {
+    'Trans Fats': 'Used in processed foods to extend shelf life',
+    'High Levels of Saturated Fat': 'Found in fried and processed foods',
+    'Artificial Flavors/Additives': 'Enhance taste and appearance in processed foods',
+    'MSG': 'Flavor enhancer in many packaged foods'
+  };
+  return uses[chemical] || 'Common food additive';
+}
+
+function getHealthImpact(chemical) {
+  const impacts = {
+    'Trans Fats': 'Increases bad cholesterol and heart disease risk',
+    'High Levels of Saturated Fat': 'Can raise cholesterol levels',
+    'Artificial Flavors/Additives': 'Potential unknown long-term effects',
+    'MSG': 'May cause headaches in sensitive individuals'
+  };
+  return impacts[chemical] || 'Potential health concerns with regular consumption';
+}
+
 // 6. ROUTES
 app.get('/', (req, res) => res.render('index'));
 
