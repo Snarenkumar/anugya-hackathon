@@ -196,7 +196,35 @@ function getHealthImpact(chemical) {
 }
 
 // 6. ROUTES
-app.get('/', (req, res) => res.render('index'));
+
+
+app.get('/', (req, res) => {
+  res.render('homepage', {
+      title: 'ANUGYA',
+      appName: 'ANUGYA',
+      tagline: 'YOUR HEALTH SCANNER',
+      description: 'Building a web application to scan packaged food products to know the ingredients and suitability to consume according to user health conditions and many more features.',
+      workflowSteps: [
+          {
+              image: '/assets/Frame.png',
+              title: 'UPLOAD',
+              description: 'Upload an image of a packaged food product to analyze its ingredients.'
+          },
+          {
+              image: '/assets/IMAGE (2).png',
+              title: 'GET RESULT',
+              description: 'AI scans and detects the ingredients, highlighting potential health risks.'
+          },
+          {
+              image: '/assets/IMAGE (3).png',
+              title: 'PERSONAL ADVICE',
+              description: 'Receive a health rating, consumption recommendations, and better alternatives.'
+          }
+      ],
+      ctaText: 'GET STARTED'
+  });
+});
+app.get('/upload', (req, res) => res.render('index'));
 
 app.post('/detail', upload.single('image'), async (req, res) => {
   try {
