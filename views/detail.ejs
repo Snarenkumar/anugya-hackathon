@@ -80,6 +80,52 @@
       margin-top: 20px;
       cursor: pointer;
     }
+    .progress-container {
+      margin: 20px 0;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #f0f0f0;
+      border-radius: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      position: absolute;
+      height: 100%;
+      width: 0%;
+      animation: progress-forward 1s ease-out forwards;
+      border-radius: 15px;
+    }
+    .progress-safe {
+      background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
+    }
+    .progress-warning {
+      background: linear-gradient(90deg, #FFC107 0%, #FF9800 100%);
+    }
+    .progress-danger {
+      background: linear-gradient(90deg, #FF5722 0%, #F44336 100%);
+    }
+    .progress-label {
+      position: absolute;
+      right: 10px;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      line-height: 20px;
+      text-shadow: 0 0 2px rgba(0,0,0,0.5);
+    }
+    @keyframes progress-forward {
+      from { width: 0%; }
+      to { width: var(--progress-width); }
+    }
   </style>
 </head>
 <body>
@@ -97,6 +143,28 @@
       <span class="hazard-option <%= analysis.hazardLevel !== 'Low Hazard' ? 'hazard-active-potential' : 'hazard-inactive' %>">
         Potential Hazard
       </span>
+    </div>
+    
+    <!-- Progress Bar Section -->
+    <div class="progress-container">
+      <div class="progress-info">
+        <span>Safety Assessment</span>
+        <span>
+          <%= analysis.hazardLevel === 'Low Hazard' ? 'Generally Safe' : 
+               analysis.hazardLevel === 'Potential Hazard' ? 'Moderate Risk' : 'High Risk' %>
+        </span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill <%= analysis.hazardLevel === 'Low Hazard' ? 'progress-safe' : 
+                                    analysis.hazardLevel === 'Potential Hazard' ? 'progress-warning' : 'progress-danger' %>"
+             style="--progress-width: <%= analysis.hazardLevel === 'Low Hazard' ? '30%' : 
+                                      analysis.hazardLevel === 'Potential Hazard' ? '70%' : '90%' %>;">
+          <span class="progress-label">
+            <%= analysis.hazardLevel === 'Low Hazard' ? 'GOOD' : 
+                 analysis.hazardLevel === 'Potential Hazard' ? 'CAUTION' : 'WARNING' %>
+          </span>
+        </div>
+      </div>
     </div>
     
     <div class="ingredients-header">Tap an Ingredient to learn more</div>
