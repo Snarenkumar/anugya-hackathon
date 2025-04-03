@@ -60,41 +60,59 @@ async function extractText(imagePath) {
   return text;
 }
 
-// 5. GEMINI ANALYSIS (Updated prompt)
 async function analyzeIngredients(ingredients) {
   try {
-    const prompt = `Analyze these food ingredients and provide a concise 4-line response:
-    1. Key ingredients detected (top 3-4)
-    2. Safety assessment based on FSSAI/WHO guidelines (3 sentences max)
-    3. 1-10 safety rating with brief explanation
-    4. Harmful chemicals detection (if any)
+    const prompt = `Analyze these food ingredients and provide a structured assessment:
+    1. Determine hazard level ("Low Hazard" or "Potential Hazard") based on FSSAI/WHO guidelines
+    2. Identify 2-3 key ingredients with brief descriptions (15 words max each)
+    3. Count of ingredients not recognized/verified
+    4. Safety rating (1-10 scale)
     
     Ingredients: ${ingredients.substring(0, 5000)}
     
-    Format response as JSON:
+    Format response as JSON exactly like this example:
     {
-      "productName": "string",
-      "keyIngredients": ["list"],
-      "safetyAssessment": "string",
-      "safetyRating": {
-        "score": number,
-        "explanation": "string"
-      },
-      "harmfulChemicals": ["list"] 
+      "productName": "Detected Product Name",
+      "hazardLevel": "Low Hazard",
+      "keyIngredients": [
+        {
+          "name": "Sugar",
+          "description": "Added sweetener, moderate consumption recommended"
+        },
+        {
+          "name": "Vitamin B6",
+          "description": "Essential nutrient, supports metabolism"
+        }
+      ],
+      "unknownIngredientsCount": 5,
+      "safetyRating": 7
     }`;
     
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
     
+    // Clean and parse response
     const cleanText = text.replace(/```json|```/g, '');
-    return JSON.parse(cleanText);
+    const analysis = JSON.parse(cleanText);
+    
+    // Add safety rating explanation based on score
+    analysis.safetyExplanation = getSafetyExplanation(analysis.safetyRating);
+    
+    return analysis;
   } catch (err) {
     console.error('Gemini Error:', err);
     throw new Error('AI analysis failed. Please try again with clearer text.');
   }
 }
 
+// Helper function for safety rating explanations
+function getSafetyExplanation(rating) {
+  if (rating >= 8) return 'Very safe for regular consumption';
+  if (rating >= 5) return 'Moderately safe, consume in moderation';
+  if (rating >= 3) return 'Exercise caution, limit consumption';
+  return 'Not recommended for regular consumption';
+}
 // 6. ROUTES
 app.get('/', (req, res) => res.render('index'));
 

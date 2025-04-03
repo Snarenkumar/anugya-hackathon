@@ -1,59 +1,118 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Scan Results</title>
+  <title>ScanOverview</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 800px;
+      max-width: 500px;
       margin: 0 auto;
       padding: 20px;
+      background-color: #f5f5f5;
     }
-    .result-container {
-      margin: 20px 0;
+    .scan-container {
+      background: white;
+      border-radius: 15px;
       padding: 20px;
-      border-radius: 10px;
-      background: #f9f9f9;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     .product-image {
-      max-width: 100%;
-      border-radius: 8px;
+      width: 100%;
+      border-radius: 10px;
       margin-bottom: 20px;
     }
-    .analysis-summary {
-      background: white;
-      padding: 15px;
+    .save-btn {
+      display: block;
+      width: 100%;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px;
       border-radius: 8px;
-      margin-bottom: 20px;
+      font-size: 16px;
+      margin: 15px 0;
+      cursor: pointer;
+    }
+    .hazard-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 0;
+    }
+    .hazard-option {
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .hazard-active-low {
+      background: #4CAF50;
+      color: white;
+    }
+    .hazard-active-potential {
+      background: #FF9800;
+      color: white;
+    }
+    .hazard-inactive {
+      background: #e0e0e0;
+      color: #757575;
+    }
+    .ingredients-header {
+      font-weight: bold;
+      margin: 20px 0 10px 0;
+    }
+    .ingredient-item {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .unknown-count {
+      color: #757575;
+      font-size: 14px;
+      margin-top: 15px;
     }
     .next-btn {
-      background-color: #4CAF50;
+      background: #2196F3;
       color: white;
-      padding: 10px 20px;
       border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      padding: 12px;
+      border-radius: 8px;
+      width: 100%;
       font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>Scan Results</h1>
-  
-  <div class="result-container">
+  <div class="scan-container">
+    <h1>ScanOverview</h1>
+    
     <img src="<%= imagePath %>" class="product-image" alt="Scanned product">
     
-    <div class="analysis-summary">
-      <h3>Quick Analysis:</h3>
-      <p><strong>Key Ingredients:</strong> <%= analysis.keyIngredients.join(', ') %></p>
-      <p><%= analysis.safetyAssessment %></p>
-      <p><strong>Safety Rating:</strong> <%= analysis.safetyRating.score %>/10 - <%= analysis.safetyRating.explanation %></p>
-      <% if (analysis.harmfulChemicals.length > 0) { %>
-        <p style="color: red;"><strong>⚠️ Contains:</strong> <%= analysis.harmfulChemicals.join(', ') %></p>
-      <% } else { %>
-        <p>No harmful chemicals detected</p>
-      <% } %>
+    <button class="save-btn">+ Tap to save this product to your library</button>
+    
+    <div class="hazard-indicator">
+      <span class="hazard-option <%= analysis.hazardLevel === 'Low Hazard' ? 'hazard-active-low' : 'hazard-inactive' %>">
+        Low Hazard
+      </span>
+      <span class="hazard-option <%= analysis.hazardLevel !== 'Low Hazard' ? 'hazard-active-potential' : 'hazard-inactive' %>">
+        Potential Hazard
+      </span>
     </div>
+    
+    <div class="ingredients-header">Tap an Ingredient to learn more</div>
+    
+    <% if (analysis.unknownIngredientsCount > 0) { %>
+      <div class="unknown-count">
+        <%= analysis.unknownIngredientsCount %> Ingredients have not been found
+      </div>
+    <% } %>
+    
+    <% analysis.keyIngredients.forEach(ingredient => { %>
+      <div class="ingredient-item">
+        <strong><%= ingredient.name %></strong>
+        <div><%= ingredient.description %></div>
+      </div>
+    <% }); %>
     
     <button class="next-btn" onclick="location.href='/final?imagePath=<%= encodeURIComponent(imagePath) %>&analysis=<%= encodeURIComponent(JSON.stringify(analysis)) %>'">
       View Detailed Analysis
