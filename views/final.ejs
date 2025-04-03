@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Detailed Analysis</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .product-image {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .analysis-section {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      background-color: #2196F3;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .rating {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .rating-safe {
+      color: #4CAF50;
+    }
+    .rating-moderate {
+      color: #FFC107;
+    }
+    .rating-danger {
+      color: #F44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>Detailed Analysis</h1>
+  
+  <div class="analysis-section">
+    <img src="<%= imagePath %>" class="product-image" alt="Scanned product">
+    
+    <h2><%= analysis.productName %></h2>
+    
+    <div class="rating 
+      <% if (analysis.safetyRating.score >= 7) { %>rating-safe<% } 
+      else if (analysis.safetyRating.score >= 4) { %>rating-moderate<% } 
+      else { %>rating-danger<% } %>">
+      Safety Rating: <%= analysis.safetyRating.score %>/10
+    </div>
+    <p><%= analysis.safetyRating.explanation %></p>
+    
+    <h3>Key Ingredients</h3>
+    <ul>
+      <% analysis.keyIngredients.forEach(ingredient => { %>
+        <li><%= ingredient %></li>
+      <% }); %>
+    </ul>
+    
+    <h3>Safety Assessment</h3>
+    <p><%= analysis.safetyAssessment %></p>
+    
+    <% if (analysis.harmfulChemicals && analysis.harmfulChemicals.length > 0) { %>
+      <div style="background: #FFEBEE; padding: 15px; border-radius: 8px;">
+        <h3 style="color: #F44336;">⚠️ Harmful Chemicals Detected</h3>
+        <ul>
+          <% analysis.harmfulChemicals.forEach(chem => { %>
+            <li><%= chem %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
+  </div>
+  
+  <button class="back-btn" onclick="history.back()">Back to Summary</button>
+</body>
+</html>

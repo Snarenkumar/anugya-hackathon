@@ -68,7 +68,7 @@
     <body>
     <h1>Food Ingredient Scanner</h1>
     <div class="scanner-box">
-        <form action="/upload" method="POST" enctype="multipart/form-data" id="upload-form">
+        <form action="/detail" method="POST" enctype="multipart/form-data" id="upload-form">
         <div id="file-upload-section">
             <div class="input1">
             <input type="file" name="image" id="file-input" accept="image/*" required>
@@ -124,6 +124,40 @@
         cameraSection.style.display = 'block';
         startCamera();
         });
+        // Modify the uploadBtn click handler
+uploadBtn.addEventListener('click', async () => {
+  try {
+    const imageData = photoCanvas.toDataURL('image/jpeg', 0.8);
+    
+    // Show loading state
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Processing...';
+    
+    // Send to server
+    const response = await fetch('/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ cameraImage: imageData })
+    });
+    
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    
+    // Redirect to results page or display results
+    window.location.href = `/result?image=${encodeURIComponent(result.imagePath)}&product=${encodeURIComponent(result.analysis.productName)}`;
+    
+  } catch (err) {
+    console.error('Upload failed:', err);
+    alert('Upload failed: ' + err.message);
+    uploadBtn.disabled = false;
+    uploadBtn.textContent = 'Use This Photo';
+  }
+});
 
         useFileBtn.addEventListener('click', () => {
         cameraSection.style.display = 'none';

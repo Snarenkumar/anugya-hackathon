@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scan Results</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .result-container {
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 10px;
+      background: #f9f9f9;
+    }
+    .product-image {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .analysis-summary {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .next-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Scan Results</h1>
+  
+  <div class="result-container">
+    <img src="<%= imagePath %>" class="product-image" alt="Scanned product">
+    
+    <div class="analysis-summary">
+      <h3>Quick Analysis:</h3>
+      <p><strong>Key Ingredients:</strong> <%= analysis.keyIngredients.join(', ') %></p>
+      <p><%= analysis.safetyAssessment %></p>
+      <p><strong>Safety Rating:</strong> <%= analysis.safetyRating.score %>/10 - <%= analysis.safetyRating.explanation %></p>
+      <% if (analysis.harmfulChemicals.length > 0) { %>
+        <p style="color: red;"><strong>⚠️ Contains:</strong> <%= analysis.harmfulChemicals.join(', ') %></p>
+      <% } else { %>
+        <p>No harmful chemicals detected</p>
+      <% } %>
+    </div>
+    
+    <button class="next-btn" onclick="location.href='/final?imagePath=<%= encodeURIComponent(imagePath) %>&analysis=<%= encodeURIComponent(JSON.stringify(analysis)) %>'">
+      View Detailed Analysis
+    </button>
+  </div>
+</body>
+</html>
