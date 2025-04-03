@@ -55,35 +55,32 @@ async function extractText(imagePath) {
   const { data: { text } } = await Tesseract.recognize(
     imagePath,
     'eng',
-    // { logger: m => console.log(m.status) }
+    { logger: m => console.log(m.status) }
   );
   return text;
 }
 
+// 5. GEMINI ANALYSIS (Updated prompt)
 async function analyzeIngredients(ingredients) {
   try {
-    const prompt = `Analyze these food ingredients and provide:
-    1. Product name
-    2. List of ALL harmful substances detected (if any)
-    3. Safety classification: "Good", "Moderate", or "Harmful"
-    4. Safety rating (1-10 scale, 1=most harmful)
-    5. Brief safety explanation (20 words max)
+    const prompt = `Analyze these food ingredients and provide a concise 4-line response: give user friendly word not complex words, and dont repeat same things
+    1. Key ingredients detected (top 3-4)
+    2. Safety assessment based on FSSAI/WHO guidelines , give proper suggestion for at least 2 or 3 sentence, no complex words, simple to understand, which they need to follow.
+    3. 1-10 safety rating with brief explanation
+    4. Harmful chemicals detection (if any)
     
     Ingredients: ${ingredients.substring(0, 5000)}
     
-    Format response as JSON exactly like this:
+    Format response as JSON:
     {
-      "productName": "Example Product",
-      "harmfulSubstances": [
-        {
-          "name": "Aspartame",
-          "riskLevel": "High",
-          "healthImpact": "Artificial sweetener linked to health concerns"
-        }
-      ],
-      "safetyClass": "Moderate",
-      "safetyRating": 6,
-      "safetyExplanation": "Contains some concerning ingredients"
+      "productName": "string",
+      "keyIngredients": ["list"],
+      "safetyAssessment": "string",
+      "safetyRating": {
+        "score": number,
+        "explanation": "string"
+      },
+      "harmfulChemicals": ["list"] 
     }`;
     
     const result = await model.generateContent(prompt);
@@ -98,13 +95,6 @@ async function analyzeIngredients(ingredients) {
   }
 }
 
-// Helper function for safety rating explanations
-function getSafetyExplanation(rating) {
-  if (rating >= 8) return 'Very safe for regular consumption';
-  if (rating >= 5) return 'Moderately safe, consume in moderation';
-  if (rating >= 3) return 'Exercise caution, limit consumption';
-  return 'Not recommended for regular consumption';
-}
 // 6. ROUTES
 app.get('/', (req, res) => res.render('index'));
 
