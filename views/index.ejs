@@ -1,176 +1,104 @@
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <title>Food Scanner</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page 2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        }
-        .scanner-box {
-        border: 2px dashed #ccc;
-        padding: 30px;
-        text-align: center;
-        margin: 20px 0;
-        border-radius: 10px;
-        }
-        .camera-container {
-        margin: 20px auto;
-        width: 100%;
-        max-width: 500px;
-        }
-        #camera-view {
-        width: 100%;
-        background: #eee;
-        display: none;
-        }
-        #capture-btn, #retake-btn, #upload-btn {
-        margin: 10px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        }
-        #capture-btn {
-        background-color: #4CAF50;
-        color: white;
-        }
-        #retake-btn {
-        background-color: #f44336;
-        color: white;
-        display: none;
-        }
-        #upload-btn {
-        background-color: #2196F3;
-        color: white;
-        display: none;
-        }
-        #photo-result {
-        display: none;
-        max-width: 100%;
-        margin: 20px auto;
-        }
-        .btn-group {
-        margin: 20px 0;
-        }
-        .switch-btn {
-        background: none;
-        border: none;
-        color: #2196F3;
-        text-decoration: underline;
-        cursor: pointer;
-        margin: 10px;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
     </style>
-    </head>
-    <body>
-    <h1>Food Ingredient Scanner</h1>
-    <div class="scanner-box">
-        <form action="/detail" method="POST" enctype="multipart/form-data" id="upload-form">
-        <div id="file-upload-section">
-            <div class="input1">
-            <input type="file" name="image" id="file-input" accept="image/*" required>
-            </div>
-            <button type="button" class="switch-btn" id="use-camera-btn">Use Camera Instead</button>
-        </div>
-
-        <div id="camera-section" style="display: none;">
-            <div class="camera-container">
-            <video id="camera-view" autoplay playsinline></video>
-            <canvas id="photo-canvas" style="display: none;"></canvas>
-            <img id="photo-result" alt="Captured photo">
-            </div>
-            <div class="btn-group">
-            <button type="button" id="capture-btn">Take Photo</button>
-            <button type="button" id="retake-btn">Retake</button>
-            <button type="button" id="upload-btn">Use This Photo</button>
-            </div>
-            <button type="button" class="switch-btn" id="use-file-btn">Upload File Instead</button>
-            <input type="hidden" name="camera-image" id="camera-image-data">
-        </div>
-
-        <div class="button1">
-            <button type="submit" id="submit-btn" style="display: none;">Scan Ingredients</button>
-        </div>
-        </form>
+</head>
+<body class="bg-black text-white font-[Inter] overflow-x-hidden flex items-center justify-center min-h-screen relative flex-col">
+    <img src="/assets/IMAGE.png" alt="Top Left" class="absolute top-0 left-0 w-52 h-82 m-2"/>
+    <img src="/assets/IMAGE (1).png" alt="Top Right" class="absolute top-0 right-0 w-52 h-82 m-2"/>
+    <img src="/assets/Untitled design (1) 2 (1).png" alt="Bottom Left" class="absolute bottom-0 left-0 w-52 h-82 m-2"/>
+    <img src="/assets/Untitled design (1) 1.png" alt="Bottom Right" class="absolute bottom-0 right-0 w-52 h-82 m-2"/>
+    
+    <div class="flex">
+        <img src="/assets/Untitled design (3) (1).png" class="w-[600px] h-[600px] z-50 mt-[80px] top-0 left-0 w-52 h-82 m-2 hidden md:block"/>
+    <div class="flex flex-col items-center">
+        <div class="flex gap-[0px] ml-[190px]">
+        <img src="/assets/Screenshot (93).png" alt="title" class="w-[260px] h-[140px] mt-[100px] ml-[-10px]  justify-center z-50 "/>
+        <img src="/assets/Untitled design (3).png" class="w-62 h-52 ml-[200px] mt-[40px] z-50 hover:rotate-[60deg] transition duration-300"/>
     </div>
-    <p>Take a photo or upload an image of food packaging to analyze ingredients</p>
+        <div class="bg-white/10 backdrop-blur-lg w-96 h-64 flex items-center justify-center text-xl font-bold rounded-lg shadow-lg shadow-purple-500">
+            <form action="/detail" method="POST" enctype="multipart/form-data" id="upload-form">
+                <div id="file-upload-section">
+                    <div class="input1">
+                        <input type="file" name="image" id="file-input" accept="image/*" required class="hidden">
+                        <label for="file-input" class="cursor-pointer">
+                            <p class="text-center">Click to select an image</p>
+                        </label>
+                    </div>
+                    <button type="button" class="switch-btn" id="use-camera-btn">Use Camera Instead</button>
+                </div>
 
-    <script>
-        // DOM Elements
-        const fileUploadSection = document.getElementById('file-upload-section');
-        const cameraSection = document.getElementById('camera-section');
-        const useCameraBtn = document.getElementById('use-camera-btn');
-        const useFileBtn = document.getElementById('use-file-btn');
-        const cameraView = document.getElementById('camera-view');
-        const photoCanvas = document.getElementById('photo-canvas');
-        const photoResult = document.getElementById('photo-result');
-        const captureBtn = document.getElementById('capture-btn');
-        const retakeBtn = document.getElementById('retake-btn');
-        const uploadBtn = document.getElementById('upload-btn');
-        const submitBtn = document.getElementById('submit-btn');
-        const fileInput = document.getElementById('file-input');
-        const cameraImageData = document.getElementById('camera-image-data');
-        const uploadForm = document.getElementById('upload-form');
+                <div id="camera-section" style="display: none;">
+                    <div class="camera-container">
+                        <video id="camera-view" autoplay playsinline class="w-full"></video>
+                        <canvas id="photo-canvas" style="display: none;"></canvas>
+                        <img id="photo-result" alt="Captured photo" class="w-full">
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" id="capture-btn" class="mt-8 px-6 py-2 bg-white/10 backdrop-blur-lg text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]">Take Photo</button>
+                        <button type="button" id="retake-btn" class="mt-8 px-6 py-2 bg-white/10 backdrop-blur-lg text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]" style="display: none;">Retake</button>
+                        <button type="button" id="upload-btn" class="mt-8 px-6 py-2 bg-white/10 backdrop-blur-lg text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]" style="display: none;">Use This Photo</button>
+                    </div>
+                    <button type="button" class="switch-btn" id="use-file-btn">Upload File Instead</button>
+                    <input type="hidden" name="camera-image" id="camera-image-data">
+                </div>
 
-        // Camera variables
-        let stream = null;
+                <div class="button1">
+                    <button type="submit" id="submit-btn" class="mt-8 px-6 py-2 bg-white/10 backdrop-blur-lg text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]" style="display: none;">Scan Ingredients</button>
+                </div>
+            </form>
+        </div>
+        
+        <img src="/assets/Untitled design (1).png" class="w-[180px] h-[220px] ml-[-400px] mt-[10px] z-50 hover:rotate-[-60deg] transition duration-300"/>
+    </div>
+    <img src="/assets/Untitled design (3) (1).png" class="w-[600px] h-[600px] z-50 mt-[80px] top-0 left-0 w-52 h-82 m-2 hidden md:block" />
+</div>
 
-        // Switch between file upload and camera
-        useCameraBtn.addEventListener('click', () => {
+<script>
+    // DOM Elements
+    const fileUploadSection = document.getElementById('file-upload-section');
+    const cameraSection = document.getElementById('camera-section');
+    const useCameraBtn = document.getElementById('use-camera-btn');
+    const useFileBtn = document.getElementById('use-file-btn');
+    const cameraView = document.getElementById('camera-view');
+    const photoCanvas = document.getElementById('photo-canvas');
+    const photoResult = document.getElementById('photo-result');
+    const captureBtn = document.getElementById('capture-btn');
+    const retakeBtn = document.getElementById('retake-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const fileInput = document.getElementById('file-input');
+    const cameraImageData = document.getElementById('camera-image-data');
+    const uploadForm = document.getElementById('upload-form');
+
+    // Camera variables
+    let stream = null;
+
+    // Switch between file upload and camera
+    useCameraBtn.addEventListener('click', () => {
         fileUploadSection.style.display = 'none';
         cameraSection.style.display = 'block';
         startCamera();
-        });
-        // Modify the uploadBtn click handler
-uploadBtn.addEventListener('click', async () => {
-  try {
-    const imageData = photoCanvas.toDataURL('image/jpeg', 0.8);
-    
-    // Show loading state
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = 'Processing...';
-    
-    // Send to server
-    const response = await fetch('/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ cameraImage: imageData })
     });
-    
-    const result = await response.json();
-    
-    if (!result.success) {
-      throw new Error(result.message);
-    }
-    
-    // Redirect to results page or display results
-    window.location.href = `/result?image=${encodeURIComponent(result.imagePath)}&product=${encodeURIComponent(result.analysis.productName)}`;
-    
-  } catch (err) {
-    console.error('Upload failed:', err);
-    alert('Upload failed: ' + err.message);
-    uploadBtn.disabled = false;
-    uploadBtn.textContent = 'Use This Photo';
-  }
-});
 
-        useFileBtn.addEventListener('click', () => {
+    useFileBtn.addEventListener('click', () => {
         cameraSection.style.display = 'none';
         fileUploadSection.style.display = 'block';
         stopCamera();
-        });
+    });
 
-        // Camera functions
-        async function startCamera() {
+    // Camera functions
+    async function startCamera() {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'environment' }, 
-            audio: false 
+                video: { facingMode: 'environment' }, 
+                audio: false 
             });
             cameraView.srcObject = stream;
             cameraView.style.display = 'block';
@@ -180,19 +108,19 @@ uploadBtn.addEventListener('click', async () => {
             alert("Could not access the camera. Please check permissions.");
             useFileBtn.click();
         }
-        }
+    }
 
-        function stopCamera() {
+    function stopCamera() {
         if (stream) {
             stream.getTracks().forEach(track => track.stop());
             cameraView.style.display = 'none';
             cameraView.srcObject = null;
             stream = null;
         }
-        }
+    }
 
-        // Capture photo
-        captureBtn.addEventListener('click', () => {
+    // Capture photo
+    captureBtn.addEventListener('click', () => {
         photoCanvas.width = cameraView.videoWidth;
         photoCanvas.height = cameraView.videoHeight;
         photoCanvas.getContext('2d').drawImage(cameraView, 0, 0);
@@ -204,72 +132,43 @@ uploadBtn.addEventListener('click', async () => {
         captureBtn.style.display = 'none';
         retakeBtn.style.display = 'inline-block';
         uploadBtn.style.display = 'inline-block';
-        });
+    });
 
-        // Retake photo
-        retakeBtn.addEventListener('click', () => {
+    // Retake photo
+    retakeBtn.addEventListener('click', () => {
         photoResult.style.display = 'none';
         cameraView.style.display = 'block';
         
         retakeBtn.style.display = 'none';
         uploadBtn.style.display = 'none';
         captureBtn.style.display = 'inline-block';
-        });
+    });
 
-        // Use captured photo
-        uploadBtn.addEventListener('click', () => {
+    // Use captured photo
+    uploadBtn.addEventListener('click', () => {
         cameraImageData.value = photoCanvas.toDataURL('image/jpeg');
         submitBtn.style.display = 'inline-block';
-        alert("Photo captured! Click 'Scan Ingredients' to proceed.");
-        });
+    });
 
-        // Handle file selection
-        fileInput.addEventListener('change', () => {
+    // Handle file selection
+    fileInput.addEventListener('change', () => {
         if (fileInput.files.length > 0) {
             submitBtn.style.display = 'inline-block';
         }
-        });
+    });
 
-        // Handle form submission
-        uploadForm.addEventListener('submit', function(e) {
+    // Handle form submission
+    uploadForm.addEventListener('submit', function(e) {
         if (!fileInput.files[0] && !cameraImageData.value) {
             e.preventDefault();
             alert("Please select an image or take a photo first.");
         }
-        });
+    });
 
-        // Clean up camera when leaving page
-        window.addEventListener('beforeunload', () => {
+    // Clean up camera when leaving page
+    window.addEventListener('beforeunload', () => {
         stopCamera();
-        });
-
-
-    </script>
-    <script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
-    <script>
-      window.addEventListener("DOMContentLoaded", function() {
-        window.AgentInitializer.init({
-          agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
-          rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
-          formID: "0195f80d7cda7c97ae5851e84e09e969a625",
-          queryParams: ["skipWelcome=1", "maximizable=1"],
-          domain: "https://www.jotform.com",
-          isDraggable: false,
-          background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
-          buttonBackgroundColor: "#0066C3",
-          buttonIconColor: "#FFFFFF",
-          variant: false,
-          customizations: {
-            "greeting": "Yes",
-            "greetingMessage": "Hi buddy! how can i help you today?",
-            "openByDefault": "No",
-            "pulse": "Yes",
-            "position": "right",
-            "autoOpenChatIn": "0"
-          },
-          isVoice: undefined
-        });
-      });
-    </script>
-    </body>
-    </html>
+    });
+</script>
+</body>
+</html>
