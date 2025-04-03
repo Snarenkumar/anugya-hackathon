@@ -1,294 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Complete Product Analysis</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f5f5f5;
-      color: #333;
-    }
-    .analysis-container {
-      background: white;
-      border-radius: 15px;
-      padding: 25px;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-    }
-    .product-header {
-      display: flex;
-      align-items: center;
-      gap: 30px;
-      margin-bottom: 25px;
-      flex-wrap: wrap;
-    }
-    .product-image {
-      width: 200px;
-      height: 200px;
-      object-fit: contain;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .product-info {
-      flex: 1;
-      min-width: 250px;
-    }
-    .columns-container {
-      display: flex;
-      gap: 25px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-    }
-    .analysis-column {
-      flex: 1;
-      min-width: 300px;
-      background: #f9f9f9;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-    }
-    h1 {
-      color: #2c3e50;
-      margin-top: 0;
-      font-size: 28px;
-    }
-    h2 {
-      color: #34495e;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 8px;
-      margin-top: 0;
-      font-size: 22px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 15px 0;
-    }
-    th, td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    th {
-      background-color: #f0f0f0;
-      font-weight: 600;
-    }
-    .positive {
-      color: #27ae60;
-      font-weight: 600;
-    }
-    .negative {
-      color: #e74c3c;
-      font-weight: 600;
-    }
-    .safety-rating {
-      font-size: 24px;
-      font-weight: bold;
-      text-align: center;
-      margin: 25px 0;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    .rating-safe {
-      background-color: #e8f5e9;
-      color: #27ae60;
-    }
-    .rating-moderate {
-      background-color: #fff8e1;
-      color: #f39c12;
-    }
-    .rating-danger {
-      background-color: #ffebee;
-      color: #e74c3c;
-    }
-    .chemical-warning {
-      background-color: #ffebee;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 25px 0;
-    }
-    .recommendation {
-      padding: 20px;
-      border-radius: 10px;
-      margin: 30px 0;
-      font-size: 17px;
-      line-height: 1.6;
-    }
-    .recommend-safe {
-      background-color: #e8f5e9;
-      border-left: 5px solid #27ae60;
-    }
-    .recommend-caution {
-      background-color: #fff8e1;
-      border-left: 5px solid #f39c12;
-    }
-    .recommend-avoid {
-      background-color: #ffebee;
-      border-left: 5px solid #e74c3c;
-    }
-    .back-btn {
-      background-color: #3498db;
-      color: white;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      margin-top: 20px;
-      display: block;
-      width: 200px;
-      text-align: center;
-      margin: 40px auto 0;
-      transition: all 0.3s;
-    }
-    .back-btn:hover {
-      background-color: #2980b9;
-      transform: translateY(-2px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    .empty-state {
-      text-align: center;
-      padding: 20px;
-      color: #7f8c8d;
-      font-style: italic;
-    }
-    .rating-explanation {
-      font-size: 16px;
-      margin-top: 10px;
-      color: #555;
-    }
-    @media (max-width: 768px) {
-      .columns-container {
-        flex-direction: column;
-      }
-      .analysis-column {
-        width: 100%;
-      }
-      .product-header {
-        flex-direction: column;
-        text-align: center;
-      }
-      .product-image {
-        margin: 0 auto 20px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Safety Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
-<body>
-  <div class="analysis-container">
-    <div class="product-header">
-      <img src="<%= imagePath %>" class="product-image" alt="Product Image">
-      <div class="product-info">
-        <h1><%= basicAnalysis.productName || 'Product Analysis' %></h1>
-        <div class="safety-rating 
-          <% if (detailedAnalysis.safetyRating >= 8) { %>rating-safe<% } 
-          else if (detailedAnalysis.safetyRating >= 5) { %>rating-moderate<% } 
-          else { %>rating-danger<% } %>">
-          Safety Score: <%= detailedAnalysis.safetyRating %>/10
-          <% if (detailedAnalysis.safetyExplanation) { %>
-            <div class="rating-explanation">
-              <%= detailedAnalysis.safetyExplanation %>
+<body class="bg-black text-white overflow-x-hidden relative min-h-screen">
+    <!-- Background images -->
+    <img src="/assets/IMAGE.png" alt="Top Left" class="absolute top-0 left-0 w-52 h-82 m-2"/>
+    <img src="/assets/IMAGE (1).png" alt="Top Right" class="absolute top-0 right-0 w-52 h-82 m-2"/>
+    <img src="/assets/Untitled_design_(1)_2_(1).png" alt="Bottom Left" class="absolute bottom-0 left-0 w-52 h-82 m-2"/>
+    <img src="/assets/Untitled_design_(1)_1.png" alt="Bottom Right" class="absolute bottom-0 right-0 w-52 h-82 m-2"/>
+
+    <div class="max-w-4xl mx-auto p-6 relative z-10">
+        <!-- Product Image and Basic Info -->
+        <div class="text-center">
+            <div class="w-96 h-64 bg-purple-600 mx-auto rounded-lg flex items-center justify-center">
+                <img src="<%= imagePath %>" alt="Product Image" class="w-full h-full object-contain rounded-lg">
             </div>
-          <% } %>
+            <h1 class="mt-4 text-2xl font-bold"><%= basicAnalysis.productName %></h1>
+            <p class="text-yellow-400 font-semibold mt-1 text-lg">SAFETY SCORE: <%= detailedAnalysis.safetyRating %>/10</p>
+            <p class="text-yellow-300 text-sm"><%= detailedAnalysis.safetyExplanation %></p>
         </div>
-      </div>
-    </div>
 
-    <div class="columns-container">
-      <div class="analysis-column">
-        <h2>✅ Beneficial Ingredients</h2>
-        <% if (detailedAnalysis.positiveIngredients && detailedAnalysis.positiveIngredients.length > 0) { %>
-          <table>
-            <thead>
-              <tr>
-                <th>Ingredient</th>
-                <th>Health Benefits</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% detailedAnalysis.positiveIngredients.forEach(ing => { %>
-                <tr>
-                  <td class="positive"><%= ing.name %></td>
-                  <td><%= ing.benefit %></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        <% } else { %>
-          <div class="empty-state">No significant beneficial ingredients found</div>
+        <!-- Two Column Layout -->
+        <div class="mt-8 flex flex-col lg:flex-row gap-6">
+            <!-- Beneficial Ingredients -->
+            <div class="lg:w-1/2 bg-white/10 backdrop-blur-lg p-6 rounded-lg min-h-[300px] border border-white/20 shadow-lg shadow-purple-500">
+                <h2 class="text-green-400 font-bold text-lg">BENEFICIAL INGREDIENTS</h2>
+                <div class="mt-3 text-sm flex justify-between text-green-500 font-semibold">
+                    <p>INGREDIENT</p>
+                    <p>HEALTH BENEFITS</p>
+                </div>
+                <div class="mt-2 text-green-300 text-sm">
+                    <% if(detailedAnalysis.positiveIngredients && detailedAnalysis.positiveIngredients.length > 0) { %>
+                        <% detailedAnalysis.positiveIngredients.forEach(ingredient => { %>
+                            <p class="flex justify-between mt-4">
+                                <span class="font-semibold"><%= ingredient.name %>:</span> 
+                                <span><%= ingredient.benefit %></span>
+                            </p>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="mt-4">No significant beneficial ingredients detected</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Concerning Ingredients -->
+            <div class="lg:w-1/2 bg-white/10 backdrop-blur-lg p-6 rounded-lg min-h-[300px] border border-white/20 shadow-lg shadow-purple-500">
+                <h2 class="text-red-500 font-bold text-lg">CONCERNING INGREDIENTS</h2>
+                <div class="mt-3 text-sm text-red-300">
+                    <% if(detailedAnalysis.negativeIngredients && detailedAnalysis.negativeIngredients.length > 0) { %>
+                        <% detailedAnalysis.negativeIngredients.forEach(ingredient => { %>
+                            <p class="flex justify-between mt-4">
+                                <span class="font-semibold"><%= ingredient.name %>:</span> 
+                                <span><%= ingredient.concern %></span>
+                            </p>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="mt-4">No concerning ingredients detected.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Harmful Chemicals Section -->
+        <% if(detailedAnalysis.harmfulChemicals && detailedAnalysis.harmfulChemicals.length > 0) { %>
+            <div class="mt-8 p-6 bg-gray-800 text-yellow-400 text-lg rounded-lg">
+                <p class="font-bold">HARMFUL CHEMICALS DETECTED:</p>
+                <div class="text-white mt-2 text-sm">
+                    <% detailedAnalysis.harmfulChemicals.forEach(chem => { %>
+                        <p class="mt-2">
+                            <span class="text-yellow-400 font-bold"><%= chem.name %>:</span> 
+                            <%= chem.commonUses %> - <%= chem.healthImpact %>
+                        </p>
+                    <% }); %>
+                </div>
+            </div>
         <% } %>
-      </div>
 
-      <div class="analysis-column">
-        <h2>⚠️ Concerning Ingredients</h2>
-        <% if (detailedAnalysis.negativeIngredients && detailedAnalysis.negativeIngredients.length > 0) { %>
-          <table>
-            <thead>
-              <tr>
-                <th>Ingredient</th>
-                <th>Potential Concerns</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% detailedAnalysis.negativeIngredients.forEach(ing => { %>
-                <tr>
-                  <td class="negative"><%= ing.name %></td>
-                  <td><%= ing.concern %></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        <% } else { %>
-          <div class="empty-state">No significant concerning ingredients found</div>
-        <% } %>
-      </div>
+        <!-- Final Recommendation -->
+        <div class="mt-8 p-6 bg-gray-800 text-yellow-400 text-lg rounded-lg">
+            <p class="font-bold">FINAL RECOMMENDATION:</p>
+            <p class="text-white mt-2 text-sm">
+                <%= detailedAnalysis.recommendationReason %>
+            </p>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-8 text-center">
+            <button onclick="window.history.back()" class="bg-purple-600 px-8 py-3 rounded-lg text-white font-bold text-lg hover:bg-purple-700 transition">
+                BACK TO SUMMARY
+            </button>
+        </div>
     </div>
-
-    <% if (detailedAnalysis.harmfulChemicals && detailedAnalysis.harmfulChemicals.length > 0) { %>
-      <div class="chemical-warning">
-        <h2>🚨 Harmful Chemicals Detected</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Chemical</th>
-              <th>Common Uses</th>
-              <th>Health Risks</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% detailedAnalysis.harmfulChemicals.forEach(chem => { %>
-              <tr>
-                <td class="negative"><%= chem.name %></td>
-                <td><%= chem.commonUses %></td>
-                <td><%= chem.healthImpact %></td>
-              </tr>
-            <% }); %>
-          </tbody>
-        </table>
-      </div>
-    <% } %>
-
-    <div class="recommendation 
-      <% if (detailedAnalysis.safetyRating >= 8) { %>recommend-safe<% } 
-      else if (detailedAnalysis.safetyRating >= 5) { %>recommend-caution<% } 
-      else { %>recommend-avoid<% } %>">
-      <h2>Final Recommendation</h2>
-      <p>
-        <% if (detailedAnalysis.safetyRating >= 8) { %>
-          <strong>✅ Safe for Regular Consumption:</strong> 
-        <% } else if (detailedAnalysis.safetyRating >= 5) { %>
-          <strong>⚠️ Moderate Consumption Recommended:</strong> 
-        <% } else { %>
-          <strong>❌ Avoid Regular Consumption:</strong> 
-        <% } %>
-        <%= detailedAnalysis.recommendationReason %>
-      </p>
-    </div>
-
-    <button class="back-btn" onclick="history.back()">← Back to Summary</button>
-  </div>
 </body>
+
+<script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
+<script>
+  window.addEventListener("DOMContentLoaded", function() {
+    window.AgentInitializer.init({
+      agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
+      rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
+      formID: "0195f80d7cda7c97ae5851e84e09e969a625",
+      queryParams: ["skipWelcome=1", "maximizable=1"],
+      domain: "https://www.jotform.com",
+      isDraggable: false,
+      background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
+      buttonBackgroundColor: "#0066C3",
+      buttonIconColor: "#FFFFFF",
+      variant: false,
+      customizations: {
+        "greeting": "Yes",
+        "greetingMessage": "Hi buddy! how can i help you today?",
+        "openByDefault": "No",
+        "pulse": "Yes",
+        "position": "right",
+        "autoOpenChatIn": "0"
+      },
+      isVoice: undefined
+    });
+  });
+</script>
 </html>
