@@ -1,202 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Scan Results</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-    .result-container {
-      background: white;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .product-image {
-      width: 100%;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    .save-btn {
-      display: block;
-      width: 100%;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 16px;
-      margin: 15px 0;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .save-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .hazard-indicator {
-      display: flex;
-      justify-content: space-between;
-      margin: 20px 0;
-    }
-    .hazard-option {
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-weight: bold;
-      transition: all 0.3s ease;
-    }
-    .hazard-active-low {
-      background: #4CAF50;
-      color: white;
-      box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
-    }
-    .hazard-active-potential {
-      background: #FF9800;
-      color: white;
-      box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
-    }
-    .hazard-inactive {
-      background: #e0e0e0;
-      color: #757575;
-    }
-    .progress-container {
-      margin: 20px 0;
-    }
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 14px;
-    }
-    .progress-bar {
-      width: 100%;
-      height: 30px; /* Increased height */
-      background-color: #f0f0f0;
-      border-radius: 15px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .progress-fill {
-      position: absolute;
-      height: 100%;
-      width: 0%;
-      animation: progress-forward 1s ease-out forwards;
-      border-radius: 15px;
-      box-shadow: 0 0 15px currentColor; /* Glow effect */
-    }
-    .progress-safe {
-      background: linear-gradient(90deg, #4CAF50 0%, #8BC34A 100%);
-      color: #4CAF50; /* For glow color */
-    }
-    .progress-warning {
-      background: linear-gradient(90deg, #FFC107 0%, #FF9800 100%);
-      color: #FF9800; /* For glow color */
-    }
-    .progress-danger {
-      background: linear-gradient(90deg, #FF5722 0%, #F44336 100%);
-      color: #F44336; /* For glow color */
-    }
-    .progress-label {
-      position: absolute;
-      right: 15px;
-      color: white;
-      font-weight: bold;
-      font-size: 14px;
-      line-height: 30px;
-      text-shadow: 0 0 3px rgba(0,0,0,0.5);
-    }
-    @keyframes progress-forward {
-      from { width: 0%; }
-      to { width: var(--progress-width); }
-    }
-    .analysis-summary {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-    .ingredient-item {
-      padding: 12px;
-      margin-bottom: 8px;
-      background: #f9f9f9;
-      border-radius: 8px;
-    }
-    .next-btn {
-      background: #2196F3;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      width: 100%;
-      font-size: 16px;
-      margin-top: 20px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .next-btn:hover {
-      background: #0d8bf2;
-    }
-    .warning-text {
-      color: #F44336;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        
+        @keyframes glow {
+          0% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.8); }
+          50% { box-shadow: 0 0 15px rgba(0, 255, 0, 1); }
+          100% { box-shadow: 0 0 5px rgba(0, 255, 0, 0.8); }
+        }
+        .glow-green { animation: glow 1.5s infinite alternate; }
+        .glow-yellow { 
+          animation: glow 1.5s infinite alternate; 
+          box-shadow: 0 0 10px rgba(255, 223, 0, 0.8); 
+        }
+        .glow-red { 
+          animation: glow 1.5s infinite alternate; 
+          box-shadow: 0 0 10px rgba(255, 0, 0, 0.8); 
+        }
+    </style>
 </head>
-<body>
-  <div class="result-container">
-    <h1>Scan Results</h1>
+<body class="bg-black text-white font-[Inter] overflow-x-hidden flex items-center justify-center min-h-screen relative flex-col">
+    <img src="/assets/IMAGE.png" alt="Top Left" class="absolute top-0 left-0 w-52 h-82 m-2"/>
+    <img src="/assets/IMAGE (1).png" alt="Top Right" class="absolute top-0 right-0 w-52 h-82 m-2"/>
+    <img src="/assets/Untitled_design_(1)_2_(1).png" alt="Bottom Left" class="absolute bottom-0 left-0 w-52 h-82 m-2"/>
+    <img src="/assets/Untitled_design_(1)_1.png" alt="Bottom Right" class="absolute bottom-0 right-0 w-52 h-82 m-2"/>
     
-    <img src="<%= imagePath %>" class="product-image" alt="Scanned product">
-    
-    <button class="save-btn">+ Tap to save this product to your library</button>
-    
-    <div class="hazard-indicator">
-      <span class="hazard-option hazard-active-low">
-        Low Hazard
-      </span>
-      <span class="hazard-option <%= analysis.safetyRating.score < 8 ? 'hazard-active-potential' : 'hazard-inactive' %>">
-        Potential Hazard
-      </span>
-    </div>
-    
-    <div class="progress-container">
-      <div class="progress-info">
-        
-        
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill 
-             <%= analysis.safetyRating.score >= 8 ? 'progress-safe' : 
-                 analysis.safetyRating.score >= 5 ? 'progress-warning' : 'progress-danger' %>"
-             style="--progress-width: <%= analysis.safetyRating.score * 10 %>%">
-          <span class="progress-label">
-            <%= analysis.safetyRating.score >= 8 ? 'GOOD' : 
-                 analysis.safetyRating.score >= 5 ? 'CAUTION' : 'WARNING' %>
-          </span>
+    <div class="flex flex-col items-center z-10">
+        <div class="bg-purple-600 w-96 h-64 flex items-center justify-center text-xl font-bold rounded-lg shadow-lg mt-4">
+            <% if (imagePath) { %>
+                <img src="<%= imagePath %>" alt="Scanned product" class="w-full h-full object-contain rounded-lg">
+            <% } else { %>
+                <p class="text-center">No image available</p>
+            <% } %>
         </div>
-      </div>
+
+        <button class="mt-8 px-6 py-2 bg-[#8F00FF] text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]">
+            Tap to save the product
+        </button>
+        
+        <div class="flex gap-24">
+            <button class="mt-8 px-6 py-2 <%= analysis.safetyRating.score >= 8 ? 'bg-[#8F00FF]' : 'bg-[#8F00FF]/50' %> text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]">
+                Low Hazard
+            </button>
+            <button class="mt-8 px-6 py-2 <%= analysis.safetyRating.score < 8 ? 'bg-[#F0C42D]' : 'bg-[#F0C42D]/50' %> text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#E1AD01]">
+                Potential Hazard
+            </button>
+        </div>
+
+        <div class="relative w-full max-w-[600px] h-12 rounded-full overflow-hidden bg-gray-200 border-t-2 border-gray-400 shadow-lg mt-2">
+            <div id="progress-bar" 
+                 class="absolute inset-0 h-full transition-all duration-[3s] 
+                        <%= analysis.safetyRating.score >= 8 ? 'bg-green-500 glow-green' : 
+                            analysis.safetyRating.score >= 5 ? 'bg-yellow-500 glow-yellow' : 'bg-red-500 glow-red' %>"
+                 style="width: <%= analysis.safetyRating.score * 10 %>%">
+            </div>
+        </div>
+
+        <div class="flex gap-[150px]">
+            <p class="text-green-500">Safety Assessment</p>
+            <p class="<%= analysis.safetyRating.score >= 8 ? 'text-green-500' : 
+                       analysis.safetyRating.score >= 5 ? 'text-yellow-500' : 'text-red-500' %>">
+                <%= analysis.safetyRating.score >= 8 ? 'Low Risk' : 
+                    analysis.safetyRating.score >= 5 ? 'Moderate Risk' : 'High Risk' %>
+            </p>
+        </div>
+
+        <h2 class="text-2xl font-bold mt-10">Quick Analysis</h2>
+        
+        <div class="flex">
+            <h2 class="text-yellow-500 font-bold mt-10">Key Ingredients:</h2>
+            <p class="font-bold mt-10 ml-2">
+                <%= (analysis.keyIngredients && analysis.keyIngredients.length) ? 
+                    analysis.keyIngredients.join(', ') : 'Not detected' %>
+            </p>
+        </div>
+
+        <div class="flex">
+            <h2 class="text-yellow-500 font-bold mt-10">Safety Ratings:</h2>
+            <p class="font-bold mt-10 ml-2">
+                <%= analysis.safetyRating.score %>/10 - <%= analysis.safetyRating.explanation %>
+            </p>
+        </div>
+
+        <div class="flex">
+            <h2 class="text-yellow-500 font-bold mt-10">Contains:</h2>
+            <p class="font-bold mt-10 ml-2 <%= (analysis.harmfulChemicals && analysis.harmfulChemicals.length > 0) ? 'text-yellow-500' : 'text-green-500' %>">
+                <%= (analysis.harmfulChemicals && analysis.harmfulChemicals.length > 0) ? 
+                    analysis.harmfulChemicals.join(', ') : 'No harmful chemicals detected' %>
+            </p>
+        </div>
+        
+        <button class="mt-8 px-6 py-2 bg-[#8F00FF] text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]"
+                onclick="window.location.href='/final?imagePath=<%= encodeURIComponent(imagePath) %>&analysis=<%= encodeURIComponent(JSON.stringify(analysis)) %>'">
+            View Detailed Analysis
+        </button>
     </div>
-    
-    <div class="analysis-summary">
-      <h3>Quick Analysis:</h3>
-      <p><strong>Key Ingredients:</strong> <%= analysis.keyIngredients.join(', ') %></p>
-      <p><%= analysis.safetyAssessment %></p>
-      <p><strong>Safety Rating:</strong> <%= analysis.safetyRating.score %>/10 - <%= analysis.safetyRating.explanation %></p>
-      <% if (analysis.harmfulChemicals.length > 0) { %>
-        <p class="warning-text">⚠️ Contains: <%= analysis.harmfulChemicals.join(', ') %></p>
-      <% } else { %>
-        <p>No harmful chemicals detected</p>
-      <% } %>
-    </div>
-    
-    <button class="next-btn" onclick="location.href='/final?imagePath=<%= encodeURIComponent(imagePath) %>&analysis=<%= encodeURIComponent(JSON.stringify(analysis)) %>'">
-      View Detailed Analysis
-    </button>
-  </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Progress bar animation is handled by CSS
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) {
+                // Force reflow to trigger animation
+                void progressBar.offsetWidth;
+            }
+        });
+    </script>
 </body>
 </html>
