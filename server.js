@@ -289,3 +289,49 @@ app.get('/final', (req, res) => {
 // 7. START SERVER
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
+
+// Mood-based food recommendations route
+app.post('/get-mood-food-recommendations', async (req, res) => {
+  try {
+    const { mood } = req.body;
+   
+    if (!mood) {
+      return res.status(400).json({ error: 'Mood is required' });
+    }
+   
+    // Construct the prompt for Gemini API
+    const prompt = `Provide 10-15 healthy food recommendations that help with ${mood} mood.
+    For each food, include a brief explanation of how it helps with this specific mood.
+    Format the response as a JSON object with a "foods" array where each item has "name" and "benefits" properties.
+    Also include an "additionalTips" property with general dietary advice for this mood.
+   
+    Example format:
+    {
+      "foods": [
+        {
+          "name": "Dark Chocolate",
+          "benefits": "Contains flavonoids that may improve mood by increasing serotonin levels"
+        }
+      ],
+      "additionalTips": "Stay hydrated and maintain regular meal times"
+    }`;
+   
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+   
+    // Clean the response and parse as JSON
+    const cleanText = text.replace(/```json|```/g, '');
+    const recommendations = JSON.parse(cleanText);
+   
+    res.json(recommendations);
+   
+  } catch (err) {
+    console.error('Mood Food Recommendation Error:', err);
+    res.status(500).json({ error: 'Failed to generate food recommendations' });
+  }
+});
+
+
+

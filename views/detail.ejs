@@ -22,15 +22,55 @@
           animation: glow 1.5s infinite alternate; 
           box-shadow: 0 0 10px rgba(255, 0, 0, 0.8); 
         }
+        
+        /* Text-to-speech button */
+        #speakBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 80px;
+            z-index: 40;
+            width: 50px;
+            height: 50px;
+            background-color: #8F00FF;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        
+        #speakBtn:hover {
+            transform: scale(1.1);
+            background-color: #A020F0;
+        }
+        
+        #speakBtn.speaking {
+            background-color: #6C73A8;
+        }
     </style>
 </head>
 <body class="bg-black text-white font-[Inter] overflow-x-hidden flex items-center justify-center min-h-screen relative flex-col">
+    <!-- Background images -->
     <img src="/assets/IMAGE.png" alt="Top Left" class="absolute top-0 left-0 w-52 h-82 m-2"/>
     <img src="/assets/IMAGE (1).png" alt="Top Right" class="absolute top-0 right-0 w-52 h-82 m-2"/>
     <img src="/assets/Untitled_design_(1)_2_(1).png" alt="Bottom Left" class="absolute bottom-0 left-0 w-52 h-82 m-2"/>
     <img src="/assets/Untitled_design_(1)_1.png" alt="Bottom Right" class="absolute bottom-0 right-0 w-52 h-82 m-2"/>
     
-    <div class="flex flex-col items-center z-10">
+    <!-- Text-to-Speech Button -->
+    <button id="speakBtn" aria-label="Read results aloud">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+    </button>
+
+    <!-- Main Content -->
+    <div class="flex flex-col items-center z-10 w-full max-w-4xl px-4">
         <div class="bg-purple-600 w-96 h-64 flex items-center justify-center text-xl font-bold rounded-lg shadow-lg mt-4">
             <% if (imagePath) { %>
                 <img src="<%= imagePath %>" alt="Scanned product" class="w-full h-full object-contain rounded-lg">
@@ -43,16 +83,16 @@
             Tap to save the product
         </button>
         
-        <div class="flex gap-24">
-            <button class="mt-8 px-6 py-2 <%= analysis.safetyRating.score >= 8 ? 'bg-[#8F00FF]' : 'bg-[#8F00FF]/50' %> text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]">
+        <div class="flex flex-wrap justify-center gap-4 md:gap-24 mt-8">
+            <button class="px-6 py-2 <%= analysis.safetyRating.score >= 8 ? 'bg-[#8F00FF]' : 'bg-[#8F00FF]/50' %> text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]">
                 Low Hazard
             </button>
-            <button class="mt-8 px-6 py-2 <%= analysis.safetyRating.score < 8 ? 'bg-[#F0C42D]' : 'bg-[#F0C42D]/50' %> text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#E1AD01]">
+            <button class="px-6 py-2 <%= analysis.safetyRating.score < 8 ? 'bg-[#F0C42D]' : 'bg-[#F0C42D]/50' %> text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#E1AD01]">
                 Potential Hazard
             </button>
         </div>
 
-        <div class="relative w-full max-w-[600px] h-12 rounded-full overflow-hidden bg-gray-200 border-t-2 border-gray-400 shadow-lg mt-2">
+        <div class="relative w-full max-w-[600px] h-12 rounded-full overflow-hidden bg-gray-200 border-t-2 border-gray-400 shadow-lg mt-8">
             <div id="progress-bar" 
                  class="absolute inset-0 h-full transition-all duration-[3s] 
                         <%= analysis.safetyRating.score >= 8 ? 'bg-green-500 glow-green' : 
@@ -61,7 +101,7 @@
             </div>
         </div>
 
-        <div class="flex gap-[150px]">
+        <div class="flex flex-wrap justify-between w-full max-w-[600px] mt-4">
             <p class="text-green-500">Safety Assessment</p>
             <p class="<%= analysis.safetyRating.score >= 8 ? 'text-green-500' : 
                        analysis.safetyRating.score >= 5 ? 'text-yellow-500' : 'text-red-500' %>">
@@ -70,29 +110,31 @@
             </p>
         </div>
 
-        <h2 class="text-2xl font-bold mt-10">Quick Analysis</h2>
+        <h2 class="text-2xl font-bold mt-10 w-full text-center">Quick Analysis</h2>
         
-        <div class="flex">
-            <h2 class="text-yellow-500 font-bold mt-10">Key Ingredients:</h2>
-            <p class="font-bold mt-10 ml-2">
-                <%= (analysis.keyIngredients && analysis.keyIngredients.length) ? 
-                    analysis.keyIngredients.join(', ') : 'Not detected' %>
-            </p>
-        </div>
+        <div class="w-full max-w-[600px] mt-6 space-y-6" id="quickAnalysisSection">
+            <div class="flex flex-wrap">
+                <h2 class="text-yellow-500 font-bold">Key Ingredients:</h2>
+                <p class="font-bold ml-2">
+                    <%= (analysis.keyIngredients && analysis.keyIngredients.length) ? 
+                        analysis.keyIngredients.join(', ') : 'Not detected' %>
+                </p>
+            </div>
 
-        <div class="flex">
-            <h2 class="text-yellow-500 font-bold mt-10">Safety Ratings:</h2>
-            <p class="font-bold mt-10 ml-2">
-                <%= analysis.safetyRating.score %>/10 - <%= analysis.safetyRating.explanation %>
-            </p>
-        </div>
+            <div class="flex flex-wrap">
+                <h2 class="text-yellow-500 font-bold">Safety Ratings:</h2>
+                <p class="font-bold ml-2">
+                    <%= analysis.safetyRating.score %>/10 - <%= analysis.safetyRating.explanation %>
+                </p>
+            </div>
 
-        <div class="flex">
-            <h2 class="text-yellow-500 font-bold mt-10">Contains:</h2>
-            <p class="font-bold mt-10 ml-2 <%= (analysis.harmfulChemicals && analysis.harmfulChemicals.length > 0) ? 'text-yellow-500' : 'text-green-500' %>">
-                <%= (analysis.harmfulChemicals && analysis.harmfulChemicals.length > 0) ? 
-                    analysis.harmfulChemicals.join(', ') : 'No harmful chemicals detected' %>
-            </p>
+            <div class="flex flex-wrap">
+                <h2 class="text-yellow-500 font-bold">Contains:</h2>
+                <p class="font-bold ml-2 <%= (analysis.harmfulChemicals && analysis.harmfulChemicals.length > 0) ? 'text-yellow-500' : 'text-green-500' %>">
+                    <%= (analysis.harmfulChemicals && analysis.harmfulChemicals.length > 0) ? 
+                        analysis.harmfulChemicals.join(', ') : 'No harmful chemicals detected' %>
+                </p>
+            </div>
         </div>
         
         <button class="mt-8 px-6 py-2 bg-[#8F00FF] text-white font-bold rounded-r-full rounded-l-full shadow-lg hover:bg-[#A020F0]"
@@ -103,41 +145,112 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Progress bar animation is handled by CSS
+            // Progress bar animation
             const progressBar = document.getElementById('progress-bar');
             if (progressBar) {
-                // Force reflow to trigger animation
                 void progressBar.offsetWidth;
+            }
+
+            // Text-to-speech functionality
+            const speakBtn = document.getElementById('speakBtn');
+            let isSpeaking = false;
+            let speechSynth = window.speechSynthesis;
+            
+            function getSpeechContent() {
+                // Start reading from Quick Analysis section
+                const quickAnalysisSection = document.getElementById('quickAnalysisSection');
+                if (!quickAnalysisSection) return '';
+                
+                let content = 'Quick Analysis. ';
+                const analysisItems = quickAnalysisSection.querySelectorAll('.flex.flex-wrap');
+                
+                analysisItems.forEach(item => {
+                    content += item.textContent.trim() + '. ';
+                });
+                
+                return content;
+            }
+
+            speakBtn.addEventListener('click', function() {
+                if (isSpeaking) {
+                    speechSynth.cancel();
+                    isSpeaking = false;
+                    speakBtn.classList.remove('speaking');
+                    speakBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>';
+                    return;
+                }
+                
+                const text = getSpeechContent();
+                if (!text) {
+                    console.error('No content found to read');
+                    return;
+                }
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                
+                // Try to find a suitable voice
+                const voices = speechSynth.getVoices();
+                if (voices.length > 0) {
+                    const preferredVoice = voices.find(v => v.lang.includes('en')) || voices[0];
+                    utterance.voice = preferredVoice;
+                }
+                
+                utterance.onend = utterance.onerror = function() {
+                    isSpeaking = false;
+                    speakBtn.classList.remove('speaking');
+                    speakBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>';
+                };
+                
+                try {
+                    speechSynth.speak(utterance);
+                    isSpeaking = true;
+                    speakBtn.classList.add('speaking');
+                    speakBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"></path><path d="M19 12H5"></path></svg>';
+                } catch (error) {
+                    console.error('Speech synthesis error:', error);
+                    isSpeaking = false;
+                }
+            });
+            
+            // Load voices if needed
+            if (speechSynth.getVoices().length === 0) {
+                speechSynth.onvoiceschanged = function() {
+                    if (speechSynth.getVoices().length > 0) {
+                        speechSynth.onvoiceschanged = null;
+                    }
+                };
             }
         });
     </script>
-</body>
-<!-- chat bot  -->
 
-<script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
-<script>
-  window.addEventListener("DOMContentLoaded", function() {
-    window.AgentInitializer.init({
-      agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
-      rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
-      formID: "0195f80d7cda7c97ae5851e84e09e969a625",
-      queryParams: ["skipWelcome=1", "maximizable=1"],
-      domain: "https://www.jotform.com",
-      isDraggable: false,
-      background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
-      buttonBackgroundColor: "#0066C3",
-      buttonIconColor: "#FFFFFF",
-      variant: false,
-      customizations: {
-        "greeting": "Yes",
-        "greetingMessage": "Hi buddy! how can i help you today?",
-        "openByDefault": "No",
-        "pulse": "Yes",
-        "position": "right",
-        "autoOpenChatIn": "0"
-      },
-      isVoice: undefined
-    });
-  });
-</script>
+    <!-- Chat bot -->
+    <script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            window.AgentInitializer.init({
+                agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
+                rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
+                formID: "0195f80d7cda7c97ae5851e84e09e969a625",
+                queryParams: ["skipWelcome=1", "maximizable=1"],
+                domain: "https://www.jotform.com",
+                isDraggable: false,
+                background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
+                buttonBackgroundColor: "#0066C3",
+                buttonIconColor: "#FFFFFF",
+                variant: false,
+                customizations: {
+                    "greeting": "Yes",
+                    "greetingMessage": "Hi buddy! how can I help you today?",
+                    "openByDefault": "No",
+                    "pulse": "Yes",
+                    "position": "left",
+                    "autoOpenChatIn": "0"
+                },
+                isVoice: undefined
+            });
+        });
+    </script>
+</body>
 </html>

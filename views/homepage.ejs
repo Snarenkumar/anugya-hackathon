@@ -1,3 +1,15 @@
+
+
+
+
+
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,9 +19,152 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+       
+        /* Mood Food Recommendation Styles */
+        .mood-food-btn {
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+          margin: 15px 0;
+          transition: background-color 0.3s;
+        }
+
+
+        .mood-food-btn:hover {
+          background-color: #45a049;
+        }
+
+
+        .mood-food-modal {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0,0,0,0.4);
+        }
+
+
+        .mood-food-modal-content {
+          background-color: #111;
+          margin: 5% auto;
+          padding: 25px;
+          border-radius: 8px;
+          width: 80%;
+          max-width: 600px;
+          max-height: 80vh;
+          overflow-y: auto;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          border: 1px solid #333;
+        }
+
+
+        .mood-food-close {
+          color: #aaa;
+          float: right;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+
+        .mood-food-close:hover {
+          color: white;
+        }
+
+
+        .mood-selection {
+          margin: 20px 0;
+        }
+
+
+        .mood-selection select {
+          width: 100%;
+          padding: 10px;
+          margin: 10px 0;
+          border: 1px solid #333;
+          border-radius: 4px;
+          background-color: #222;
+          color: white;
+        }
+
+
+        .mood-selection button {
+          background-color: #4CAF50;
+          color: white;
+          border: none;
+          padding: 10px 15px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+
+
+        .mood-selection button:hover {
+          background-color: #45a049;
+        }
+
+
+        .recommendations-result {
+          margin-top: 20px;
+          padding: 15px;
+          border-radius: 4px;
+          background-color: #222;
+          color: white;
+          max-height: 50vh;
+          overflow-y: auto;
+        }
+
+
+        .recommendations-result h3 {
+          color: #8F00FF;
+          margin-bottom: 10px;
+        }
+
+
+        .recommendations-result ul {
+          list-style-type: none;
+          padding: 0;
+        }
+
+
+        .recommendations-result li {
+          padding: 8px 0;
+          border-bottom: 1px solid #333;
+        }
+
+
+        .loading {
+          text-align: center;
+          padding: 20px;
+        }
+
+
+        .spinner {
+          border: 4px solid rgba(255, 255, 255, 0.1);
+          border-radius: 50%;
+          border-top: 4px solid #8F00FF;
+          width: 30px;
+          height: 30px;
+          animation: spin 1s linear infinite;
+          margin: 0 auto;
+        }
+
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-black text-white font-[Inter] overflow-x-hidden">
+
 
     <!-- Decorative corner images -->
     <img src="/assets/IMAGE.png" alt="Top Left" class="absolute top-0 left-0 w-52 h-82 m-2"/>
@@ -17,10 +172,12 @@
     <img src="/assets/Untitled design (1) 2 (1).png" alt="Bottom Left" class="absolute bottom-0 left-0 w-52 h-82 m-2"/>
     <img src="/assets/Untitled design (1) 1.png" alt="Bottom Right" class="absolute bottom-0 right-0 w-52 h-82 m-2"/>
 
+
     <!-- Main content -->
     <div class="flex flex-col items-center text-center mt-20 px-4">
         <!-- Logo -->
         <img src="/assets/Screenshot (93).png" alt="<%= appName %> Logo" class="w-62 h-52 justify-center"/>
+
 
         <!-- Description box -->
         <div class="bg-[#111] p-6 mt-6 rounded-lg shadow-lg max-w-md w-full border border-gray-700">
@@ -29,6 +186,11 @@
                 <%= description %>
             </p>
         </div>
+
+
+        <!-- Mood-based food recommendation button -->
+        <button id="moodFoodBtn" class="mood-food-btn">Get Food Recommendations Based on Your Mood</button>
+
 
         <!-- Workflow section -->
         <h2 class="text-2xl font-bold mt-10">WORKFLOW</h2>
@@ -44,42 +206,151 @@
             <% }); %>
         </div>
 
+
         <!-- CTA Button -->
-        <button 
-    onclick="window.location.href='/upload'"
-    class="bg-[#8F00FF] text-white font-bold py-3 px-10 rounded-full mt-10 hover:bg-[#A020F0] transition duration-300 text-lg">
-    <%= ctaText %>
-
-
-</button>
+        <button
+            onclick="window.location.href='/upload'"
+            class="bg-[#8F00FF] text-white font-bold py-3 px-10 rounded-full mt-10 hover:bg-[#A020F0] transition duration-300 text-lg">
+            <%= ctaText %>
+        </button>
     </div>
 
-</body>
 
-<script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
-<script>
-  window.addEventListener("DOMContentLoaded", function() {
-    window.AgentInitializer.init({
-      agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
-      rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
-      formID: "0195f80d7cda7c97ae5851e84e09e969a625",
-      queryParams: ["skipWelcome=1", "maximizable=1"],
-      domain: "https://www.jotform.com",
-      isDraggable: false,
-      background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
-      buttonBackgroundColor: "#0066C3",
-      buttonIconColor: "#FFFFFF",
-      variant: false,
-      customizations: {
-        "greeting": "Yes",
-        "greetingMessage": "Hi buddy! how can i help you today?",
-        "openByDefault": "No",
-        "pulse": "Yes",
-        "position": "right",
-        "autoOpenChatIn": "0"
-      },
-      isVoice: undefined
-    });
-  });
-</script>
+    <!-- Mood Food Recommendation Modal -->
+    <div id="moodFoodModal" class="mood-food-modal">
+        <div class="mood-food-modal-content">
+            <span class="mood-food-close">&times;</span>
+            <h2 class="text-xl font-bold text-purple-400">Mood-Based Food Recommendations</h2>
+            <div class="mood-selection">
+                <p class="text-gray-300">How are you feeling today?</p>
+                <select id="moodSelect" class="bg-[#222] text-white">
+                    <option value="">Select your mood...</option>
+                    <option value="stressed">Stressed</option>
+                    <option value="anxious">Anxious</option>
+                    <option value="depressed">Depressed</option>
+                    <option value="tired">Tired/Fatigued</option>
+                    <option value="angry">Angry/Irritable</option>
+                    <option value="sad">Sad</option>
+                    <option value="happy">Happy (maintain mood)</option>
+                </select>
+                <button id="getRecommendationsBtn" class="mt-4">Get Food Recommendations</button>
+            </div>
+            <div id="recommendationsResult" class="recommendations-result"></div>
+        </div>
+    </div>
+
+
+    <script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            window.AgentInitializer.init({
+                agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
+                rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
+                formID: "0195f80d7cda7c97ae5851e84e09e969a625",
+                queryParams: ["skipWelcome=1", "maximizable=1"],
+                domain: "https://www.jotform.com",
+                isDraggable: false,
+                background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
+                buttonBackgroundColor: "#0066C3",
+                buttonIconColor: "#FFFFFF",
+                variant: false,
+                customizations: {
+                    "greeting": "Yes",
+                    "greetingMessage": "Hi buddy! how can i help you today?",
+                    "openByDefault": "No",
+                    "pulse": "Yes",
+                    "position": "right",
+                    "autoOpenChatIn": "0"
+                },
+                isVoice: undefined
+            });
+
+
+            // Mood Food Recommendation Script
+            const modal = document.getElementById('moodFoodModal');
+            const btn = document.getElementById('moodFoodBtn');
+            const span = document.getElementsByClassName('mood-food-close')[0];
+            const moodSelect = document.getElementById('moodSelect');
+            const getRecBtn = document.getElementById('getRecommendationsBtn');
+            const resultDiv = document.getElementById('recommendationsResult');
+
+
+            // Open modal when button is clicked
+            btn.onclick = function() {
+                modal.style.display = "block";
+            }
+
+
+            // Close modal when X is clicked
+            span.onclick = function() {
+                modal.style.display = "none";
+                resultDiv.innerHTML = '';
+                moodSelect.value = '';
+            }
+
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                    resultDiv.innerHTML = '';
+                    moodSelect.value = '';
+                }
+            }
+
+
+            // Get recommendations when button is clicked
+            getRecBtn.onclick = async function() {
+                const mood = moodSelect.value;
+               
+                if (!mood) {
+                    resultDiv.innerHTML = '<p style="color: red;">Please select your mood first.</p>';
+                    return;
+                }
+               
+                // Show loading spinner
+                resultDiv.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Finding the best foods for your mood...</p>
+                    </div>
+                `;
+               
+                try {
+                    // Call your Gemini API endpoint
+                    const response = await fetch('/get-mood-food-recommendations', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ mood: mood })
+                    });
+                   
+                    const data = await response.json();
+                   
+                    if (data.error) {
+                        resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                        return;
+                    }
+                   
+                    // Display the recommendations
+                    let html = `<h3 class="text-purple-400">Foods to help with ${mood}:</h3><ul>`;
+                   
+                    // Assuming the API returns an array of food items
+                    data.foods.forEach(food => {
+                        html += `<li><strong class="text-white">${food.name}</strong>: <span class="text-gray-300">${food.benefits}</span></li>`;
+                    });
+                   
+                    html += `</ul><p class="text-gray-300 mt-4">${data.additionalTips || ''}</p>`;
+                    resultDiv.innerHTML = html;
+                   
+                } catch (error) {
+                    console.error('Error:', error);
+                    resultDiv.innerHTML = `<p style="color: red;">Failed to get recommendations. Please try again later.</p>`;
+                }
+            };
+        });
+    </script>
+</body>
 </html>
+

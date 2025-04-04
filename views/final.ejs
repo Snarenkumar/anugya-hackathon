@@ -10,6 +10,34 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        
+        /* Text-to-speech button */
+        #speakBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 80px;
+            z-index: 40;
+            width: 50px;
+            height: 50px;
+            background-color: #8F00FF;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        
+        #speakBtn:hover {
+            transform: scale(1.1);
+            background-color: #A020F0;
+        }
+        
+        #speakBtn.speaking {
+            background-color: #6C73A8;
+        }
     </style>
 </head>
 <body class="bg-black text-white overflow-x-hidden relative min-h-screen">
@@ -31,7 +59,7 @@
         </div>
 
         <!-- Two Column Layout -->
-        <div class="mt-8 flex flex-col lg:flex-row gap-6">
+        <div class="mt-8 flex flex-col lg:flex-row gap-6" id="ingredientsSection">
             <!-- Beneficial Ingredients -->
             <div class="lg:w-1/2 bg-white/10 backdrop-blur-lg p-6 rounded-lg min-h-[300px] border border-white/20 shadow-lg shadow-purple-500">
                 <h2 class="text-green-400 font-bold text-lg">BENEFICIAL INGREDIENTS</h2>
@@ -73,7 +101,7 @@
 
         <!-- Harmful Chemicals Section -->
         <% if(detailedAnalysis.harmfulChemicals && detailedAnalysis.harmfulChemicals.length > 0) { %>
-            <div class="mt-8 p-6 bg-gray-800 text-yellow-400 text-lg rounded-lg">
+            <div class="mt-8 p-6 bg-gray-800 text-yellow-400 text-lg rounded-lg" id="harmfulChemicals">
                 <p class="font-bold">HARMFUL CHEMICALS DETECTED:</p>
                 <div class="text-white mt-2 text-sm">
                     <% detailedAnalysis.harmfulChemicals.forEach(chem => { %>
@@ -87,7 +115,7 @@
         <% } %>
 
         <!-- Final Recommendation -->
-        <div class="mt-8 p-6 bg-gray-800 text-yellow-400 text-lg rounded-lg">
+        <div class="mt-8 p-6 bg-gray-800 text-yellow-400 text-lg rounded-lg" id="recommendation">
             <p class="font-bold">FINAL RECOMMENDATION:</p>
             <p class="text-white mt-2 text-sm">
                 <%= detailedAnalysis.recommendationReason %>
@@ -101,32 +129,131 @@
             </button>
         </div>
     </div>
-</body>
+    
+    <!-- Text-to-Speech Button -->
+    <button id="speakBtn" class="fixed bottom-4 right-20 bg-purple-600 text-white p-3 rounded-full shadow-lg z-50 hover:bg-purple-700 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+    </button>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const speakBtn = document.getElementById('speakBtn');
+            let isSpeaking = false;
+            let speechSynth = window.speechSynthesis;
+            
+            function getSpeechContent() {
+                let content = '';
+                
+                // Start with ingredients section
+                const ingredientsSection = document.getElementById('ingredientsSection');
+                if (ingredientsSection) {
+                    const beneficial = ingredientsSection.querySelector('.text-green-300');
+                    const concerning = ingredientsSection.querySelector('.text-red-300');
+                    
+                    if (beneficial) content += 'Beneficial Ingredients. ' + beneficial.textContent + '. ';
+                    if (concerning) content += 'Concerning Ingredients. ' + concerning.textContent + '. ';
+                }
+                
+                // Add harmful chemicals if present
+                const harmfulChemicals = document.getElementById('harmfulChemicals');
+                if (harmfulChemicals) {
+                    content += 'Harmful Chemicals. ' + harmfulChemicals.textContent + '. ';
+                }
+                
+                // Add recommendation
+                const recommendation = document.getElementById('recommendation');
+                if (recommendation) {
+                    content += 'Recommendation. ' + recommendation.textContent;
+                }
+                
+                return content;
+            }
+            
+            speakBtn.addEventListener('click', function() {
+                if (isSpeaking) {
+                    speechSynth.cancel();
+                    isSpeaking = false;
+                    speakBtn.classList.remove('speaking');
+                    speakBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>';
+                    return;
+                }
+                
+                const text = getSpeechContent();
+                if (!text) {
+                    console.error('No content found to read');
+                    return;
+                }
+                
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                
+                // Try to find a suitable voice
+                const voices = speechSynth.getVoices();
+                if (voices.length > 0) {
+                    const preferredVoice = voices.find(v => v.lang.includes('en')) || voices[0];
+                    utterance.voice = preferredVoice;
+                }
+                
+                utterance.onend = utterance.onerror = function() {
+                    isSpeaking = false;
+                    speakBtn.classList.remove('speaking');
+                    speakBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>';
+                };
+                
+                try {
+                    speechSynth.speak(utterance);
+                    isSpeaking = true;
+                    speakBtn.classList.add('speaking');
+                    speakBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"></path><path d="M19 12H5"></path></svg>';
+                } catch (error) {
+                    console.error('Speech synthesis error:', error);
+                    isSpeaking = false;
+                }
+            });
+            
+            // Load voices if needed
+            if (speechSynth.getVoices().length === 0) {
+                speechSynth.onvoiceschanged = function() {
+                    if (speechSynth.getVoices().length > 0) {
+                        speechSynth.onvoiceschanged = null;
+                    }
+                };
+            }
+        });
+    </script>
 
-<script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
-<script>
-  window.addEventListener("DOMContentLoaded", function() {
-    window.AgentInitializer.init({
-      agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
-      rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
-      formID: "0195f80d7cda7c97ae5851e84e09e969a625",
-      queryParams: ["skipWelcome=1", "maximizable=1"],
-      domain: "https://www.jotform.com",
-      isDraggable: false,
-      background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
-      buttonBackgroundColor: "#0066C3",
-      buttonIconColor: "#FFFFFF",
-      variant: false,
-      customizations: {
-        "greeting": "Yes",
-        "greetingMessage": "Hi buddy! how can i help you today?",
-        "openByDefault": "No",
-        "pulse": "Yes",
-        "position": "right",
-        "autoOpenChatIn": "0"
-      },
-      isVoice: undefined
-    });
-  });
-</script>
+    <!-- Chat bot -->
+    <script src='https://cdn.jotfor.ms/s/umd/latest/for-embedded-agent.js'></script>
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            window.AgentInitializer.init({
+                agentRenderURL: "https://agent.jotform.com/0195f80d7cda7c97ae5851e84e09e969a625",
+                rootId: "JotformAgent-0195f80d7cda7c97ae5851e84e09e969a625",
+                formID: "0195f80d7cda7c97ae5851e84e09e969a625",
+                queryParams: ["skipWelcome=1", "maximizable=1"],
+                domain: "https://www.jotform.com",
+                isDraggable: false,
+                background: "linear-gradient(180deg, #6C73A8 0%, #6C73A8 100%)",
+                buttonBackgroundColor: "#0066C3",
+                buttonIconColor: "#FFFFFF",
+                variant: false,
+                customizations: {
+                    "greeting": "Yes",
+                    "greetingMessage": "Hi buddy! how can I help you today?",
+                    "openByDefault": "No",
+                    "pulse": "Yes",
+                    "position": "left",
+                    "autoOpenChatIn": "0"
+                },
+                isVoice: undefined
+            });
+        });
+    </script>
+</body>
 </html>
